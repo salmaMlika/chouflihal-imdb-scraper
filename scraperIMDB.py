@@ -2,7 +2,12 @@ from bs4 import BeautifulSoup
 import requests
 import numpy as np
 from config import HEADERS
+import openpyxl
 
+excel = openpyxl.Workbook()
+sheet= excel.active
+sheet.title='choufli hal scraping'
+sheet.append(['Season', 'Episode Number', 'Episode Description', 'Date of Release', 'Rating', 'Number of Raters'])
 
 pages = np.arange(1, 7)
 
@@ -25,16 +30,19 @@ try:
                 
                 ep_season=ep_number_full.split('.')[0].strip()
                 ep_number = ep_number_full.split('.')[1].strip()   
-                
+            ep_brief = episod.find('div', class_="ipc-html-content-inner-div").text
+            ep_date = episod.find('span', class_="sc-f2169d65-10 bYaARM").text
+
             ep_rating_elem = episod.find('span', class_="ipc-rating-star--rating")
             ep_rating = ep_rating_elem.text if ep_rating_elem else "Not Available"
 
             ep_raters_elem = episod.find('span', class_="ipc-rating-star--voteCount")
             ep_raters_number = ep_raters_elem.text.replace('(', '').replace(')', '') if ep_raters_elem else "Not Available"
 
-            ep_brief = episod.find('div', class_="ipc-html-content-inner-div").text
-            ep_date = episod.find('span', class_="sc-f2169d65-10 bYaARM").text
+            
 
-            print(ep_season)
+            sheet.append([ep_season,ep_number,ep_brief,ep_date,ep_rating,ep_raters_number])
+
 except Exception as e:
     print(f"An error occurred: {e}")
+excel.save('chouflihal_episodes.xlsx')
